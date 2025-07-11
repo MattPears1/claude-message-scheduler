@@ -136,8 +136,12 @@ SendSpecificMessage(hwnd, msgID) {
                 SendText(msg.Text)
                 Sleep(100)
                 
-                ; Send Enter
+                ; Send Enter - try multiple methods for reliability
                 Send("{Enter}")
+                Sleep(50)
+                SendEvent("{Enter}")
+                Sleep(50)
+                ControlSend("{Enter}", , hwnd)
                 
                 ; Mark as sent
                 msg.Sent := true
