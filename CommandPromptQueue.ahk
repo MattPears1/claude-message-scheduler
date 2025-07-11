@@ -32,7 +32,7 @@ F9:: {
     ; Delay input
     inputGui.Add("Text", "Section", "When to send:")
     delayEdit := inputGui.Add("Edit", "w100")
-    inputGui.Add("Text", "x+10", "Examples: 30s, 5m, 1h")
+    inputGui.Add("Text", "x+10", "Examples: 30s, 5m, 1h, 13:30")
     
     ; Buttons
     btnSubmit := inputGui.Add("Button", "w80 xs Section Default", "&Submit")
@@ -59,7 +59,7 @@ F9:: {
         ; Parse delay
         delayMs := ParseDelay(delay)
         if (delayMs <= 0) {
-            MsgBox("Invalid delay format! Use: 30s, 5m, 1h", "Error", "Icon!")
+            MsgBox("Invalid delay format! Use: 30s, 5m, 1h, or 13:30", "Error", "Icon!")
             return
         }
         
@@ -363,6 +363,37 @@ SendSpecificMessage(hwnd, msgID) {
 ParseDelay(input) {
     input := Trim(input)
     
+    ; Check for time format (HH:MM or H:MM)
+    if (RegExMatch(input, "^(\d{1,2}):(\d{2})$", &m)) {
+        targetHour := Integer(m[1])
+        targetMin := Integer(m[2])
+        
+        ; Validate time
+        if (targetHour >= 0 && targetHour <= 23 && targetMin >= 0 && targetMin <= 59) {
+            ; Get current time
+            currentTime := A_Now
+            currentHour := Integer(FormatTime(currentTime, "HH"))
+            currentMin := Integer(FormatTime(currentTime, "mm"))
+            
+            ; Calculate target time today
+            targetTime := FormatTime(currentTime, "yyyyMMdd") . Format("{:02d}{:02d}00", targetHour, targetMin)
+            
+            ; If target time is in the past, assume tomorrow
+            if (targetTime <= currentTime) {
+                targetTime := DateAdd(targetTime, 1, "Days")
+                
+                ; Show warning for next day
+                ToolTip("Note: " . input . " is in the past.`nScheduling for tomorrow!")
+                SetTimer(() => ToolTip(), -3000)
+            }
+            
+            ; Calculate milliseconds until target time
+            diffSeconds := DateDiff(targetTime, currentTime, "Seconds")
+            return diffSeconds * 1000
+        }
+    }
+    
+    ; Original delay formats
     if (RegExMatch(input, "^(\d+)s$", &m))
         return Integer(m[1]) * 1000
     else if (RegExMatch(input, "^(\d+)m$", &m))

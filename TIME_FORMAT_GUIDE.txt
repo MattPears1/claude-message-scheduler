@@ -1,0 +1,34 @@
+TIME FORMAT GUIDE - Schedule Messages at Specific Times
+======================================================
+
+You can now enter EXACT TIMES instead of just delays!
+
+EXAMPLES:
+---------
+13:30   = 1:30 PM today
+9:00    = 9:00 AM (tomorrow if already past)
+22:45   = 10:45 PM today
+0:30    = 12:30 AM (tomorrow)
+
+OLD FORMAT STILL WORKS:
+----------------------
+30s     = 30 seconds from now
+5m      = 5 minutes from now
+1h      = 1 hour from now
+90      = 90 minutes from now
+
+HOW IT WORKS:
+------------
+1. Press F9
+2. Type your message
+3. Enter time like "13:30" or delay like "5m"
+4. If the time is already past (like entering 9:00 at 3 PM), 
+   it automatically schedules for tomorrow
+
+PERFECT FOR:
+-----------
+- "Send this at 3:30 PM when the meeting starts"
+- "Send at 17:00 when work day ends"
+- "Send at 9:00 tomorrow morning"
+
+The scheduler shows both the exact time AND countdown!
