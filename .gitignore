@@ -1,0 +1,19 @@
+# AutoHotkey compiled files
+*.exe.bak
+*.ahk.bak
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Personal files
+OLD_SCRIPTS/
+TestShiftF9.ahk
+personal_messages.txt
+
+# IDE
+.vscode/
+.idea/
