@@ -12,7 +12,7 @@ This AutoHotkey script allows you to:
 
 ## Who It's For
 
-Created by a Doctor of Psychology and developer for use with Claude Code Pro subscription. Perfect for users who want to maximize their Claude Code usage by running automated sessions overnight.
+Created by a developer using Claude Code Pro subscription. Getting the most out of the subscription means using it 24/7 and this tool allows you to do this.
 
 ## Installation
 
@@ -98,7 +98,7 @@ MIT License - Free for anyone to use and modify
 
 ## Author
 
-Created by Matt Pears (MattPears1) - Doctor of Psychology & Developer
+Created by Matt Pears (MattPears1) - Developer
 
 Using this with Claude Code Pro to maximize productivity through overnight automated sessions.
 
