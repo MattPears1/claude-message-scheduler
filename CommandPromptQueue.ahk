@@ -166,7 +166,9 @@ SendSpecificMessage(hwnd, msgID) {
     if (Result = "Yes") {
         ; Create restart script
         restartScript := A_Temp . "\quick_restart.bat"
-        FileDelete(restartScript)
+        try {
+            FileDelete(restartScript)
+        }
         FileAppend("
         (
 @echo off
@@ -185,15 +187,18 @@ exit
     hwnd := WinGetID("A")
     title := WinGetTitle("A")
     
-    ; Create view GUI with cyberpunk theme
-    viewGui := Gui("+AlwaysOnTop", "Message Queue - " . title)
-    viewGui.BackColor := "0A0A0A"  ; Dark background
-    viewGui.MarginX := 20
-    viewGui.MarginY := 20
+    ; Create view GUI with modern sleek theme - 50% larger
+    viewGui := Gui("+AlwaysOnTop -MinimizeBox", "Claude Message Queue")
+    viewGui.BackColor := "1a1a1a"  ; Modern dark background
+    viewGui.MarginX := 30
+    viewGui.MarginY := 25
     
-    ; Title with cyberpunk style
-    titleText := viewGui.Add("Text", "Section w700 Center c00FF41", "═══════════ SCHEDULED TRANSMISSIONS ═══════════")
-    titleText.SetFont("s14 Bold", "Consolas")
+    ; Add gradient-like header background
+    headerBg := viewGui.Add("Text", "Section w1200 h80 Background0F0F0F")
+    
+    ; Modern title with better visibility
+    titleText := viewGui.Add("Text", "xp+20 yp+15 w1160 Center c00D4FF BackgroundTrans", "SCHEDULED TRANSMISSIONS")
+    titleText.SetFont("s24 Bold", "Segoe UI")
     
     ; Motivational phrases (randomly selected)
     phrases := [
@@ -216,14 +221,15 @@ exit
     
     ; Select random phrase
     phraseIndex := Random(1, phrases.Length)
-    motivationalText := viewGui.Add("Text", "w700 Center cFF00FF", phrases[phraseIndex])
-    motivationalText.SetFont("s10 Italic", "Consolas")
+    motivationalText := viewGui.Add("Text", "xs+20 y+5 w1160 Center c00FFAA BackgroundTrans", phrases[phraseIndex])
+    motivationalText.SetFont("s12 Italic", "Segoe UI Light")
     
-    viewGui.Add("Text", "w700 h2 Background00FF41")  ; Neon green line
+    ; Modern separator with gradient effect
+    viewGui.Add("Text", "xs w1200 h3 Background005577")
     
-    ; Message list with better column widths
-    lvMessages := viewGui.Add("ListView", "w800 r12 Background0A0A0A c00FF41", ["#", "Message", "Send Time", "Countdown", "Status"])
-    lvMessages.SetFont("s10", "Consolas")
+    ; Modern list view with proper columns - 50% larger
+    lvMessages := viewGui.Add("ListView", "xs w1200 r15 Background262626 -Grid +LV0x14", ["Row", "Message", "Send Time", "Countdown", "Status"])
+    lvMessages.SetFont("s11", "Segoe UI")
     
     ; Populate list
     hasMessages := false
@@ -254,12 +260,12 @@ exit
         lvMessages.Add("", "No messages scheduled", "", "", "")
     }
     
-    ; Set specific column widths
-    lvMessages.ModifyCol(1, 40, "Center")   ; # - 40px centered
-    lvMessages.ModifyCol(2, 350)            ; Message - 350px
-    lvMessages.ModifyCol(3, 100, "Center")  ; Send Time - 100px
-    lvMessages.ModifyCol(4, 150, "Center")  ; Countdown - 150px
-    lvMessages.ModifyCol(5, 120, "Center")  ; Status - 120px
+    ; Set specific column widths - 50% larger
+    lvMessages.ModifyCol(1, 60, "Center")    ; Row - 60px centered
+    lvMessages.ModifyCol(2, 600)             ; Message - 600px
+    lvMessages.ModifyCol(3, 150, "Center")   ; Send Time - 150px
+    lvMessages.ModifyCol(4, 200, "Center")   ; Countdown - 200px
+    lvMessages.ModifyCol(5, 150, "Center")   ; Status - 150px
     
     ; Track selection time
     global SelectedRow := 0
@@ -353,31 +359,38 @@ exit
         }
     }
     
-    ; Buttons
-    btnCopy := viewGui.Add("Button", "w80 Section", "📋 Copy")
-    btnCancel := viewGui.Add("Button", "w80 x+5", "❌ Cancel")
+    ; Modern button section with glass effect background
+    btnBg := viewGui.Add("Text", "xs w1200 h60 Background1F1F1F")
     
-    ; Add space before Clear All button
-    viewGui.Add("Text", "w20 x+5", "")  ; Spacer
+    ; Modern styled buttons - larger and glossier
+    btnCopy := viewGui.Add("Button", "xs+20 yp+10 w120 h40", "📋 Copy")
+    btnCopy.SetFont("s11 Bold", "Segoe UI")
     
-    btnClear := viewGui.Add("Button", "w80 x+5", "🗑️ CLEAR ALL")
-    btnClear.Opt("Background8B0000")  ; Dark red background
+    btnCancel := viewGui.Add("Button", "x+15 w120 h40", "❌ Cancel")
+    btnCancel.SetFont("s11 Bold", "Segoe UI")
     
-    ; Add more space before Close
-    viewGui.Add("Text", "w20 x+5", "")  ; Spacer
+    ; Separator space
+    viewGui.Add("Text", "x+50 w1 h40 Background444444")
     
-    btnClose := viewGui.Add("Button", "w80 x+5", "&Close")
+    btnClear := viewGui.Add("Button", "x+50 w150 h40", "🗑️ CLEAR ALL")
+    btnClear.SetFont("s11 Bold", "Segoe UI")
+    btnClear.Opt("Background8B0000")
     
-    ; Add more space before Kill button
-    viewGui.Add("Text", "w30 x+5", "")  ; Spacer
+    ; Separator space
+    viewGui.Add("Text", "x+50 w1 h40 Background444444")
     
-    ; Add Kill/Restart button with warning color
-    btnKill := viewGui.Add("Button", "w100 x+5", "⚡ RESTART")
-    btnKill.Opt("BackgroundFF4500")  ; Orange-red color
+    btnClose := viewGui.Add("Button", "x+50 w120 h40", "Close")
+    btnClose.SetFont("s11 Bold", "Segoe UI")
     
-    ; Add cyberpunk styled instructions
-    instructionText := viewGui.Add("Text", "xs w700 Center c00FFFF", "[ SELECT MESSAGE → EXECUTE ACTION ]")
-    instructionText.SetFont("s9", "Consolas")
+    ; Restart button on the right
+    btnKill := viewGui.Add("Button", "x+50 w140 h40", "⚡ RESTART")
+    btnKill.SetFont("s11 Bold", "Segoe UI")
+    btnKill.Opt("BackgroundFF6600")
+    
+    ; Modern instructions with clean design
+    viewGui.Add("Text", "xs w1200 h2 Background005577")  ; Separator
+    instructionText := viewGui.Add("Text", "xs w1200 Center c88DDFF", "Select a message and choose an action")
+    instructionText.SetFont("s10", "Segoe UI")
     
     ; Copy button handler
     btnCopy.OnEvent("Click", CopySelectedMessage)
@@ -481,7 +494,9 @@ exit
             ; Create a batch file to restart
             restartScript := A_Temp . "\restart_scheduler.bat"
             
+            try {
             FileDelete(restartScript)
+        }
             FileAppend("
             (
 @echo off
@@ -501,12 +516,12 @@ exit
         }
     }
     
-    ; Add bottom border
-    viewGui.Add("Text", "xs w700 h2 Background00FF41")  ; Neon green line
+    ; Modern footer section
+    footerBg := viewGui.Add("Text", "xs w1200 h50 Background0F0F0F")
     
-    ; Add system status
-    statusText := viewGui.Add("Text", "w700 Center c00FF41", "SYSTEM STATUS: ONLINE | SCHEDULER: ACTIVE | FUTURE: AUTOMATED")
-    statusText.SetFont("s8", "Consolas")
+    ; Add system status with modern styling
+    statusText := viewGui.Add("Text", "xp+20 yp+15 w1160 Center c00D4FF BackgroundTrans", "SYSTEM STATUS: ONLINE  •  SCHEDULER: ACTIVE  •  FUTURE: AUTOMATED")
+    statusText.SetFont("s10 Bold", "Segoe UI")
     
     ; Show GUI
     viewGui.Show()
