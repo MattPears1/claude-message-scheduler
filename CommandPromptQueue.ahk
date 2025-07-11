@@ -209,11 +209,30 @@ SendSpecificMessage(hwnd, msgID) {
     ; Auto-size columns
     lvMessages.ModifyCol()
     
+    ; Track selection time
+    global SelectedRow := 0
+    global SelectionTime := 0
+    
+    ; Handle selection changes
+    lvMessages.OnEvent("ItemSelect", (LV, Item, Selected) => {
+        if (Selected) {
+            SelectedRow := Item
+            SelectionTime := A_TickCount
+        }
+    })
+    
     ; Refresh timer
     RefreshTimer := () => RefreshView()
     SetTimer(RefreshTimer, 1000)
     
     RefreshView() {
+        ; Save current selection if it's recent (less than 5 seconds old)
+        preserveSelection := false
+        if (SelectedRow > 0 && (A_TickCount - SelectionTime) < 5000) {
+            preserveSelection := true
+            savedSelection := SelectedRow
+        }
+        
         lvMessages.Delete()
         hasMessages := false
         count := 0
@@ -254,6 +273,12 @@ SendSpecificMessage(hwnd, msgID) {
         if (!hasMessages) {
             lvMessages.Add("", "", "No messages scheduled", "", "", "")
         }
+        
+        ; Restore selection if it was recent
+        if (preserveSelection && savedSelection <= lvMessages.GetCount()) {
+            lvMessages.Modify(savedSelection, "Select Focus")
+            SelectedRow := savedSelection
+        }
     }
     
     ; Store full messages for copy function
@@ -277,7 +302,16 @@ SendSpecificMessage(hwnd, msgID) {
     ; Buttons
     btnCopy := viewGui.Add("Button", "w80 Section", "📋 Copy")
     btnCancel := viewGui.Add("Button", "w80 x+5", "❌ Cancel")
-    btnClear := viewGui.Add("Button", "w80 x+5", "Clear All")
+    
+    ; Add space before Clear All button
+    viewGui.Add("Text", "w20 x+5", "")  ; Spacer
+    
+    btnClear := viewGui.Add("Button", "w80 x+5", "🗑️ CLEAR ALL")
+    btnClear.Opt("Background8B0000")  ; Dark red background
+    
+    ; Add more space before Close
+    viewGui.Add("Text", "w20 x+5", "")  ; Spacer
+    
     btnClose := viewGui.Add("Button", "w80 x+5", "&Close")
     
     ; Add instructions
@@ -336,6 +370,25 @@ SendSpecificMessage(hwnd, msgID) {
     
     ClearMessages(*) {
         if (MessageQueues.Has(hwnd)) {
+            ; Count pending messages
+            pendingCount := 0
+            for msg in MessageQueues[hwnd].Messages {
+                if (!msg.Sent) {
+                    pendingCount++
+                }
+            }
+            
+            if (pendingCount > 0) {
+                ; Confirmation dialog
+                Result := MsgBox("Are you sure you want to clear ALL " . pendingCount . " scheduled messages?`n`nThis cannot be undone!", 
+                                "Confirm Clear All", "YesNo Icon! Default2")
+                
+                if (Result = "No") {
+                    return
+                }
+            }
+            
+            ; Clear all messages
             for msg in MessageQueues[hwnd].Messages {
                 if (!msg.Sent && msg.Timer) {
                     SetTimer(msg.Timer, 0)
@@ -343,7 +396,7 @@ SendSpecificMessage(hwnd, msgID) {
             }
             MessageQueues.Delete(hwnd)
             RefreshView()
-            ToolTip("All messages cleared!")
+            ToolTip("✓ All messages cleared!")
             SetTimer(() => ToolTip(), -2000)
         }
     }

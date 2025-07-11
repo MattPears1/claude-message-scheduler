@@ -1,0 +1,36 @@
+UI IMPROVEMENTS - Better Safety & Usability
+==========================================
+
+VISUAL CHANGES:
+--------------
+1. CLEAR ALL button is now:
+   - Dark red color (hard to miss)
+   - Has trash icon 🗑️
+   - Separated with space from other buttons
+   - Shows confirmation dialog before clearing
+
+2. Button layout:
+   [Copy] [Cancel]    [CLEAR ALL]    [Close]
+   
+   With spaces between groups to prevent accidents
+
+SELECTION IMPROVEMENTS:
+----------------------
+- Selected messages stay selected for 5 seconds
+- Even when the list refreshes every second
+- Gives you time to click Copy or Cancel
+- Selection only clears after 5 seconds of no activity
+
+SAFETY FEATURES:
+---------------
+- Clear All asks "Are you sure?" with message count
+- Default button is "No" (must deliberately choose Yes)  
+- Warning icon in confirmation dialog
+- Can't accidentally clear everything with one click
+
+USAGE TIPS:
+----------
+1. Click a message to select it
+2. You have 5 seconds to click Copy/Cancel
+3. If you need more time, click it again to reset timer
+4. Clear All is now safely separated and requires confirmation
