@@ -165,17 +165,45 @@ SendSpecificMessage(hwnd, msgID) {
     hwnd := WinGetID("A")
     title := WinGetTitle("A")
     
-    ; Create view GUI
+    ; Create view GUI with cyberpunk theme
     viewGui := Gui("+AlwaysOnTop", "Message Queue - " . title)
-    viewGui.MarginX := 15
-    viewGui.MarginY := 15
+    viewGui.BackColor := "0A0A0A"  ; Dark background
+    viewGui.MarginX := 20
+    viewGui.MarginY := 20
     
-    ; Title
-    viewGui.Add("Text", "Section", "Scheduled Messages for this window:")
-    viewGui.Add("Text", "w500 h1 Background808080")
+    ; Title with cyberpunk style
+    titleText := viewGui.Add("Text", "Section w700 Center c00FF41", "═══════════ SCHEDULED TRANSMISSIONS ═══════════")
+    titleText.SetFont("s14 Bold", "Consolas")
     
-    ; Message list
-    lvMessages := viewGui.Add("ListView", "w700 r10", ["#", "Message", "Send Time", "Countdown", "Status"])
+    ; Motivational phrases (randomly selected)
+    phrases := [
+        "「 The future is automated, and you're already there 」",
+        "「 While you sleep, your digital self works 」",
+        "「 Time is currency - you're investing wisely 」",
+        "「 24/7 productivity unlocked 」",
+        "「 Your AI assistant never rests, neither should your ambition 」",
+        "「 Scheduling the future, one message at a time 」",
+        "「 Efficiency is the new superpower 」",
+        "「 You're not procrastinating, you're time-hacking 」",
+        "「 Every scheduled message is a step toward your goals 」",
+        "「 Automate today, celebrate tomorrow 」",
+        "「 Your future self will thank you for this 」",
+        "「 Maximum output, minimum input - that's the way 」",
+        "「 Work smarter, not harder - you've mastered it 」",
+        "「 The grid never sleeps, and neither does progress 」",
+        "「 You're writing the code of your own success 」"
+    ]
+    
+    ; Select random phrase
+    phraseIndex := Random(1, phrases.Length)
+    motivationalText := viewGui.Add("Text", "w700 Center cFF00FF", phrases[phraseIndex])
+    motivationalText.SetFont("s10 Italic", "Consolas")
+    
+    viewGui.Add("Text", "w700 h2 Background00FF41")  ; Neon green line
+    
+    ; Message list with better column widths
+    lvMessages := viewGui.Add("ListView", "w800 r12 Background0A0A0A c00FF41", ["#", "Message", "Send Time", "Countdown", "Status"])
+    lvMessages.SetFont("s10", "Consolas")
     
     ; Populate list
     hasMessages := false
@@ -206,8 +234,12 @@ SendSpecificMessage(hwnd, msgID) {
         lvMessages.Add("", "No messages scheduled", "", "", "")
     }
     
-    ; Auto-size columns
-    lvMessages.ModifyCol()
+    ; Set specific column widths
+    lvMessages.ModifyCol(1, 40, "Center")   ; # - 40px centered
+    lvMessages.ModifyCol(2, 350)            ; Message - 350px
+    lvMessages.ModifyCol(3, 100, "Center")  ; Send Time - 100px
+    lvMessages.ModifyCol(4, 150, "Center")  ; Countdown - 150px
+    lvMessages.ModifyCol(5, 120, "Center")  ; Status - 120px
     
     ; Track selection time
     global SelectedRow := 0
@@ -316,8 +348,9 @@ SendSpecificMessage(hwnd, msgID) {
     
     btnClose := viewGui.Add("Button", "w80 x+5", "&Close")
     
-    ; Add instructions
-    viewGui.Add("Text", "xs w400", "Select a message and click Copy to clipboard or Cancel to remove")
+    ; Add cyberpunk styled instructions
+    instructionText := viewGui.Add("Text", "xs w700 Center c00FFFF", "[ SELECT MESSAGE → EXECUTE ACTION ]")
+    instructionText.SetFont("s9", "Consolas")
     
     ; Copy button handler
     btnCopy.OnEvent("Click", CopySelectedMessage)
@@ -409,6 +442,13 @@ SendSpecificMessage(hwnd, msgID) {
         SetTimer(RefreshTimer, 0)
         viewGui.Destroy()
     }
+    
+    ; Add bottom border
+    viewGui.Add("Text", "xs w700 h2 Background00FF41")  ; Neon green line
+    
+    ; Add system status
+    statusText := viewGui.Add("Text", "w700 Center c00FF41", "SYSTEM STATUS: ONLINE | SCHEDULER: ACTIVE | FUTURE: AUTOMATED")
+    statusText.SetFont("s8", "Consolas")
     
     ; Show GUI
     viewGui.Show()
