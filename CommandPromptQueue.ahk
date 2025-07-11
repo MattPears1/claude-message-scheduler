@@ -2,6 +2,9 @@
 ; F9 = Schedule what you've already typed
 ; Shift+F9 = View queue
 
+; Ensure only one instance runs
+#SingleInstance Force
+
 global MessageQueues := Map()
 global MessageID := 0
 
@@ -176,12 +179,14 @@ SendSpecificMessage(hwnd, msgID) {
     
     ; Populate list
     hasMessages := false
+    count := 0
     if (MessageQueues.Has(hwnd)) {
         for msg in MessageQueues[hwnd].Messages {
             if (!msg.Sent) {
                 remaining := DateDiff(msg.SendTime, A_Now, "Seconds")
                 
                 if (remaining > 0) {
+                    count++
                     hasMessages := true
                     timeStr := FormatDelay(remaining * 1000)
                     sendTimeStr := FormatTime(msg.SendTime, "HH:mm")
