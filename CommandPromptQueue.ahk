@@ -214,12 +214,14 @@ SendSpecificMessage(hwnd, msgID) {
     global SelectionTime := 0
     
     ; Handle selection changes
-    lvMessages.OnEvent("ItemSelect", (LV, Item, Selected) => {
+    lvMessages.OnEvent("ItemSelect", HandleSelection)
+    
+    HandleSelection(LV, Item, Selected) {
         if (Selected) {
-            SelectedRow := Item
-            SelectionTime := A_TickCount
+            global SelectedRow := Item
+            global SelectionTime := A_TickCount
         }
-    })
+    }
     
     ; Refresh timer
     RefreshTimer := () => RefreshView()
