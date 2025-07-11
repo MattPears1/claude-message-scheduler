@@ -160,6 +160,26 @@ SendSpecificMessage(hwnd, msgID) {
     }
 }
 
+; Ctrl+Shift+Q - Quick restart
+^+Q:: {
+    Result := MsgBox("Quick restart scheduler?", "Restart", "YesNo T5 Default2")
+    if (Result = "Yes") {
+        ; Create restart script
+        restartScript := A_Temp . "\quick_restart.bat"
+        FileDelete(restartScript)
+        FileAppend("
+        (
+@echo off
+timeout /t 1 >nul
+start """" """ . A_ScriptFullPath . """
+exit
+        )", restartScript)
+        
+        Run(restartScript, , "Hide")
+        ExitApp()
+    }
+}
+
 ; Shift+F9 - View queue
 +F9:: {
     hwnd := WinGetID("A")
@@ -348,6 +368,13 @@ SendSpecificMessage(hwnd, msgID) {
     
     btnClose := viewGui.Add("Button", "w80 x+5", "&Close")
     
+    ; Add more space before Kill button
+    viewGui.Add("Text", "w30 x+5", "")  ; Spacer
+    
+    ; Add Kill/Restart button with warning color
+    btnKill := viewGui.Add("Button", "w100 x+5", "⚡ RESTART")
+    btnKill.Opt("BackgroundFF4500")  ; Orange-red color
+    
     ; Add cyberpunk styled instructions
     instructionText := viewGui.Add("Text", "xs w700 Center c00FFFF", "[ SELECT MESSAGE → EXECUTE ACTION ]")
     instructionText.SetFont("s9", "Consolas")
@@ -441,6 +468,37 @@ SendSpecificMessage(hwnd, msgID) {
     CloseWindow(*) {
         SetTimer(RefreshTimer, 0)
         viewGui.Destroy()
+    }
+    
+    ; Kill/Restart handler
+    btnKill.OnEvent("Click", RestartScheduler)
+    
+    RestartScheduler(*) {
+        Result := MsgBox("This will restart the scheduler.`n`nAll scheduled messages will be preserved.`n`nContinue?", 
+                        "Restart Scheduler", "YesNo Icon? Default2")
+        
+        if (Result = "Yes") {
+            ; Create a batch file to restart
+            restartScript := A_Temp . "\restart_scheduler.bat"
+            
+            FileDelete(restartScript)
+            FileAppend("
+            (
+@echo off
+timeout /t 1 >nul
+start """" """ . A_ScriptFullPath . """
+exit
+            )", restartScript)
+            
+            ; Show restart message
+            ToolTip("⚡ RESTARTING SCHEDULER...`n`nPlease wait 2 seconds")
+            
+            ; Run the restart script
+            Run(restartScript, , "Hide")
+            
+            ; Exit current instance
+            ExitApp()
+        }
     }
     
     ; Add bottom border

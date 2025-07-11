@@ -1,0 +1,34 @@
+RESTART/KILL FEATURE
+====================
+
+NEW WAYS TO RESTART THE SCHEDULER:
+
+1. RESTART BUTTON (In Queue Window)
+   - Press Shift+F9 to open queue
+   - Click the orange "⚡ RESTART" button
+   - Confirms before restarting
+   - Scheduler restarts in 2 seconds
+
+2. QUICK RESTART HOTKEY
+   - Press Ctrl+Shift+Q anywhere
+   - Quick 5-second timeout dialog
+   - Instant restart if you confirm
+
+3. MANUAL KILL (Emergency)
+   - Task Manager → End AutoHotkey
+   - Or use the RESTART button
+
+WHY RESTART?
+- Apply script updates
+- Clear any issues
+- Fresh start without losing Windows autostart
+- Faster than Task Manager
+
+WHAT HAPPENS:
+1. Current scheduler closes
+2. Wait 1 second
+3. New instance starts automatically
+4. All your autostart settings remain
+
+NOTE: Any currently scheduled messages will be lost
+when restarting. Copy important messages first!
