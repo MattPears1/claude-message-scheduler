@@ -172,7 +172,7 @@ SendSpecificMessage(hwnd, msgID) {
     viewGui.Add("Text", "w500 h1 Background808080")
     
     ; Message list
-    lvMessages := viewGui.Add("ListView", "w600 r10", ["Message", "Send Time", "Countdown", "Status"])
+    lvMessages := viewGui.Add("ListView", "w700 r10", ["#", "Message", "Send Time", "Countdown", "Status"])
     
     ; Populate list
     hasMessages := false
@@ -191,7 +191,7 @@ SendSpecificMessage(hwnd, msgID) {
                     if (StrLen(displayText) > 40)
                         displayText := SubStr(displayText, 1, 37) . "..."
                     
-                    lvMessages.Add("", displayText, sendTimeStr, timeStr, "Waiting")
+                    lvMessages.Add("", count, displayText, sendTimeStr, timeStr, "Waiting")
                 }
             }
         }
@@ -211,6 +211,10 @@ SendSpecificMessage(hwnd, msgID) {
     RefreshView() {
         lvMessages.Delete()
         hasMessages := false
+        count := 0
+        
+        ; Rebuild ViewMessages array
+        ViewMessages := []
         
         if (MessageQueues.Has(hwnd)) {
             for msg in MessageQueues[hwnd].Messages {
@@ -230,20 +234,98 @@ SendSpecificMessage(hwnd, msgID) {
                         if (StrLen(displayText) > 40)
                             displayText := SubStr(displayText, 1, 37) . "..."
                         
-                        lvMessages.Add("", displayText, sendTimeStr, timeStr, status)
+                        ; Add count for row number
+                        count++
+                        
+                        ; Add to ViewMessages for copy/cancel
+                        ViewMessages.Push({Text: msg.Text, ID: msg.ID, Timer: msg.Timer})
+                        
+                        lvMessages.Add("", count, displayText, sendTimeStr, timeStr, status)
                     }
                 }
             }
         }
         
         if (!hasMessages) {
-            lvMessages.Add("", "No messages scheduled", "", "", "")
+            lvMessages.Add("", "", "No messages scheduled", "", "", "")
+        }
+    }
+    
+    ; Store full messages for copy function
+    global ViewMessages := []
+    global ViewMessageRows := Map()
+    rowNum := 0
+    
+    if (MessageQueues.Has(hwnd)) {
+        for msg in MessageQueues[hwnd].Messages {
+            if (!msg.Sent) {
+                remaining := DateDiff(msg.SendTime, A_Now, "Seconds")
+                if (remaining > 0) {
+                    rowNum++
+                    ViewMessages.Push({Text: msg.Text, ID: msg.ID, Timer: msg.Timer})
+                    ViewMessageRows[rowNum] := msg.ID
+                }
+            }
         }
     }
     
     ; Buttons
-    btnClear := viewGui.Add("Button", "w100 Section", "&Clear All")
-    btnClose := viewGui.Add("Button", "w100 x+10", "&Close")
+    btnCopy := viewGui.Add("Button", "w80 Section", "📋 Copy")
+    btnCancel := viewGui.Add("Button", "w80 x+5", "❌ Cancel")
+    btnClear := viewGui.Add("Button", "w80 x+5", "Clear All")
+    btnClose := viewGui.Add("Button", "w80 x+5", "&Close")
+    
+    ; Add instructions
+    viewGui.Add("Text", "xs w400", "Select a message and click Copy to clipboard or Cancel to remove")
+    
+    ; Copy button handler
+    btnCopy.OnEvent("Click", CopySelectedMessage)
+    
+    CopySelectedMessage(*) {
+        selected := lvMessages.GetNext()
+        if (selected > 0 && selected <= ViewMessages.Length) {
+            A_Clipboard := ViewMessages[selected].Text
+            ToolTip("✓ Message copied to clipboard!`n`n" . ViewMessages[selected].Text)
+            SetTimer(() => ToolTip(), -2500)
+        } else {
+            ToolTip("Please select a message to copy")
+            SetTimer(() => ToolTip(), -1500)
+        }
+    }
+    
+    ; Cancel button handler
+    btnCancel.OnEvent("Click", CancelSelectedMessage)
+    
+    CancelSelectedMessage(*) {
+        selected := lvMessages.GetNext()
+        if (selected > 0 && selected <= ViewMessages.Length) {
+            msgToCancel := ViewMessages[selected]
+            
+            ; Cancel the timer
+            if (msgToCancel.Timer) {
+                SetTimer(msgToCancel.Timer, 0)
+            }
+            
+            ; Find and mark as sent
+            for msg in MessageQueues[hwnd].Messages {
+                if (msg.ID = msgToCancel.ID && !msg.Sent) {
+                    msg.Sent := true
+                    ToolTip("✓ Message cancelled`n`n" . SubStr(msg.Text, 1, 50) . "...")
+                    SetTimer(() => ToolTip(), -2000)
+                    
+                    ; Remove from view arrays
+                    ViewMessages.RemoveAt(selected)
+                    
+                    ; Refresh the list
+                    RefreshView()
+                    break
+                }
+            }
+        } else {
+            ToolTip("Please select a message to cancel")
+            SetTimer(() => ToolTip(), -1500)
+        }
+    }
     
     btnClear.OnEvent("Click", ClearMessages)
     
